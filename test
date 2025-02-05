@@ -1,0 +1,16 @@
+[33mcommit df63af1f5616672ab0c2fa87fdc524c93b6eb24f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Ratila <32056559+Ratila67@users.noreply.github.com>
+Date:   Wed Feb 5 16:09:20 2025 +0000
+
+    test jerome
+
+[1mdiff --git a/streamlit_app.py b/streamlit_app.py[m
+[1mindex 0832bd8..8b741d0 100644[m
+[1m--- a/streamlit_app.py[m
+[1m+++ b/streamlit_app.py[m
+[36m@@ -4,3 +4,4 @@[m [mst.title("Outil d'Analyse de portfeuille d'investissement")[m
+ st.write([m
+     "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."[m
+ )[m
+[32m+[m[32mst.write("Test de duo")[m
+\ No newline at end of file[m
