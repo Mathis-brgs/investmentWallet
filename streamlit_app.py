@@ -84,8 +84,8 @@ if not top_cryptos.empty:
             st.write(f"💲 {row['current_price']}")
         with col4:
             st.write(f"📈 {row['price_change_percentage_24h']:.2f} %")
-    else:
-        st.write("Impossible de récupérer les tendances du marché pour le moment.")
+else:
+    st.write("Impossible de récupérer les tendances du marché pour le moment.")
 
 
 end_date = datetime.today().strftime("%Y-%m-%d")
