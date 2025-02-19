@@ -11,7 +11,8 @@ cryptos = {
     "Bitcoin": "BTC-USD",
     "Ethereum": "ETH-USD",
     "Ripple": "XRP-USD",
-    "Bitcoin Cash": "BCH-USD"
+    "Bitcoin Cash": "BCH-USD",
+    "Solana": "SOL-USD"
 }
 
 @st.cache_data
@@ -37,7 +38,7 @@ def download_crypto_data(symbol, start, end):
         st.error(f"Erreur lors du téléchargement des données pour {symbol}: {e}")
         return None
 
-start_date, end_date = "2025-02-01", "2025-02-10"
+start_date, end_date = "2025-02-01", "2025-02-19"
 crypto_data = {name: download_crypto_data(symbol, start_date, end_date) for name, symbol in cryptos.items()}
 
 # Affichage des données Bitcoin
@@ -50,3 +51,22 @@ if crypto_data["Bitcoin"] is not None:
 else:
     st.warning("Impossible d'afficher les données Bitcoin.")
 
+# Affichage des données Ethereum
+st.subheader("Ethereum ($)")
+eth_img_url = 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+st.image(Image.open(urlopen(eth_img_url)))
+
+if crypto_data["Ethereum"] is not None:
+    st.table(crypto_data["Ethereum"])
+else:
+    st.warning("Impossible d'afficher les données Ethereum.")
+
+# Affichage des données Solana
+st.subheader("Solana ($)")
+sol_img_url = 'https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png'
+st.image(Image.open(urlopen(sol_img_url)))
+
+if crypto_data["Solana"] is not None:
+    st.table(crypto_data["Solana"])
+else:
+    st.warning("Impossible d'afficher les données Solana.")
