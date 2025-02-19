@@ -2,48 +2,51 @@ import streamlit as st
 import yfinance as yf
 from PIL import Image
 from urllib.request import urlopen
-import time
 
-st.title("Outil d'Analyse de portfeuille d'investissement")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
-st.write("Test de duo")
-
+st.title("Outil d'Analyse de Portefeuille d'Investissement")
 st.header("Main Dashboard")
 
-# definir les variables
-Bitcoin = 'BTC-USD'
-Ethereum = 'ETH-USD'
-Ripple = 'XRP-USD'
-BitcoinCash = 'BCH-USD'
+# Définition des symboles crypto
+cryptos = {
+    "Bitcoin": "BTC-USD",
+    "Ethereum": "ETH-USD",
+    "Ripple": "XRP-USD",
+    "Bitcoin Cash": "BCH-USD"
+}
 
-#Acces au data par yahoo finance
-BTC_Data = yf.Ticker(Bitcoin)
-ETH_Data = yf.Ticker(Ethereum)
-XRP_Data = yf.Ticker(Ripple)
-BCH_Data = yf.Ticker(BitcoinCash)
+@st.cache_data
+def get_crypto_history(symbol):
+    """Récupère l'historique des prix d'une crypto en cache"""
+    try:
+        crypto_data = yf.Ticker(symbol)
+        return crypto_data.history(period="max")
+    except Exception as e:
+        st.error(f"Erreur lors de la récupération des données pour {symbol}: {e}")
+        return None
 
-#Recupere l'historique
-BTHhis = BTC_Data.history(period="max")
-time.sleep(2)
-ETHhis = ETH_Data.history(period="max")
-time.sleep(2)
-XRPhis = XRP_Data.history(period="max")
-time.sleep(2)
-BCHhis = BCH_Data.history(period="max")
-time.sleep(2)
+# Récupération des historiques en cache permet de limiter les requetes.
+historical_data = {name: get_crypto_history(symbol) for name, symbol in cryptos.items()}
 
-# Fetch crypto data for the dataframe
-BTC = yf.download(Bitcoin, start="2025-02-01", end="2025-02-10")
-ETH = yf.download(Ethereum, start="2025-02-01", end="2025-02-10")
-XRP = yf.download(Ripple, start="2025-02-01", end="2025-02-10")
-BCH = yf.download(BitcoinCash, start="2025-02-01", end="2025-02-10")
+# Téléchargement des données sur une période donnée
+@st.cache_data
+def download_crypto_data(symbol, start, end):
+    """Télécharge les données d'une crypto pour une période donnée."""
+    try:
+        return yf.download(symbol, start=start, end=end)
+    except Exception as e:
+        st.error(f"Erreur lors du téléchargement des données pour {symbol}: {e}")
+        return None
 
-#Bitcoin
-st.write("Bitcoin ($)")
-imageBTC = Image.open(urlopen('https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'))
-#Display image
-st.image(imageBTC)
-#Display dataframe
-st.table(BTC)
+start_date, end_date = "2025-02-01", "2025-02-10"
+crypto_data = {name: download_crypto_data(symbol, start_date, end_date) for name, symbol in cryptos.items()}
+
+# Affichage des données Bitcoin
+st.subheader("Bitcoin ($)")
+btc_img_url = 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
+st.image(Image.open(urlopen(btc_img_url)))
+
+if crypto_data["Bitcoin"] is not None:
+    st.table(crypto_data["Bitcoin"])
+else:
+    st.warning("Impossible d'afficher les données Bitcoin.")
+
