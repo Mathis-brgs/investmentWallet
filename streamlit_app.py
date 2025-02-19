@@ -2,6 +2,9 @@ import streamlit as st
 import yfinance as yf
 from PIL import Image
 from urllib.request import urlopen
+import pandas as pd
+import requests
+from datetime import datetime, timedelta
 
 st.title("Outil d'Analyse de Portefeuille d'Investissement")
 st.header("Main Dashboard")
@@ -38,8 +41,58 @@ def download_crypto_data(symbol, start, end):
         st.error(f"Erreur lors du téléchargement des données pour {symbol}: {e}")
         return None
 
-start_date, end_date = "2025-02-01", "2025-02-19"
+#Recuperer les tendances du marchés
+@st.cache_data
+def get_top_trending_cryptos():
+    url = "https://api.coingecko.com/api/v3/coins/markets"
+    params = {
+        "vs_currency": "usd",
+        "order": "market_cap_desc",
+        "per_page": 100,
+        "page": 1,
+        "sparkline": False
+    }
+    
+    try:
+        response = requests.get(url, params=params)
+        data = response.json()
+        df = pd.DataFrame(data)
+        
+        # Trier par la plus forte hausse en pourcentage sur 24h
+        df = df.sort_values(by="price_change_percentage_24h", ascending=False)
+        
+        # Sélectionner les 5 cryptos les plus performantes
+        top_5 = df.head(5)[["name", "symbol", "image", "current_price", "price_change_percentage_24h"]]
+        
+        return top_5
+    except Exception as e:
+        st.error(f"Erreur lors de la récupération des tendances : {e}")
+        return pd.DataFrame()
+
+#top5    
+st.header("Top 5 tendances du marchés (24H)")
+top_cryptos = get_top_trending_cryptos()
+
+if not top_cryptos.empty:
+    for index, row in top_cryptos.iterrows():
+        col1, col2, col3, col4 = st.columns([1,2,2,2])
+        with col1:
+            st.image(row["image"], width=40)
+        with col2:
+            st.write(f"**{row['name']} ({row['symbol'].upper()})**")
+        with col3:
+            st.write(f"💲 {row['current_price']}")
+        with col4:
+            st.write(f"📈 {row['price_change_percentage_24h']:.2f} %")
+    else:
+        st.write("Impossible de récupérer les tendances du marché pour le moment.")
+
+
+end_date = datetime.today().strftime("%Y-%m-%d")
+start_date = (datetime.today() - timedelta(days=14)).strftime("%Y-%m-%d")
 crypto_data = {name: download_crypto_data(symbol, start_date, end_date) for name, symbol in cryptos.items()}
+
+st.write(f"Période analysée : {start_date} → {end_date}")
 
 # Affichage des données Bitcoin
 st.subheader("Bitcoin ($)")
