@@ -6,7 +6,7 @@ from urllib.request import urlopen
 st.title("Outil d'Analyse de Portefeuille d'Investissement")
 st.header("Main Dashboard")
 
-# Définition des symboles crypto
+# Définition des crypto
 cryptos = {
     "Bitcoin": "BTC-USD",
     "Ethereum": "ETH-USD",
@@ -48,6 +48,7 @@ st.image(Image.open(urlopen(btc_img_url)))
 
 if crypto_data["Bitcoin"] is not None:
     st.table(crypto_data["Bitcoin"])
+    st.line_chart(crypto_data["Bitcoin"]["Close"])
 else:
     st.warning("Impossible d'afficher les données Bitcoin.")
 
@@ -58,6 +59,7 @@ st.image(Image.open(urlopen(eth_img_url)))
 
 if crypto_data["Ethereum"] is not None:
     st.table(crypto_data["Ethereum"])
+    st.line_chart(crypto_data["Ethereum"]["Close"])
 else:
     st.warning("Impossible d'afficher les données Ethereum.")
 
@@ -68,5 +70,6 @@ st.image(Image.open(urlopen(sol_img_url)))
 
 if crypto_data["Solana"] is not None:
     st.table(crypto_data["Solana"])
+    st.line_chart(crypto_data["Solana"]["Close"])
 else:
     st.warning("Impossible d'afficher les données Solana.")
