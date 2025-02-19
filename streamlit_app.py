@@ -2,6 +2,7 @@ import streamlit as st
 import yfinance as yf
 from PIL import Image
 from urllib.request import urlopen
+import time
 
 st.title("Outil d'Analyse de portfeuille d'investissement")
 st.write(
@@ -25,9 +26,13 @@ BCH_Data = yf.Ticker(BitcoinCash)
 
 #Recupere l'historique
 BTHhis = BTC_Data.history(period="max")
+time.sleep(2)
 ETHhis = ETH_Data.history(period="max")
+time.sleep(2)
 XRPhis = XRP_Data.history(period="max")
+time.sleep(2)
 BCHhis = BCH_Data.history(period="max")
+time.sleep(2)
 
 # Fetch crypto data for the dataframe
 BTC = yf.download(Bitcoin, start="2025-02-01", end="2025-02-10")
