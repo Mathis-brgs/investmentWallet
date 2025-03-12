@@ -94,35 +94,41 @@ crypto_data = {name: download_crypto_data(symbol, start_date, end_date) for name
 
 st.write(f"Période analysée : {start_date} → {end_date}")
 
-# Affichage des données Bitcoin
-st.subheader("Bitcoin ($)")
-btc_img_url = 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
-st.image(Image.open(urlopen(btc_img_url)))
+titres_onglets = ['Bitcoin', 'Ethereum', 'Solana']
+onglet1, onglet2, onglet3 = st.tabs(titres_onglets)
 
-if crypto_data["Bitcoin"] is not None:
-    st.table(crypto_data["Bitcoin"])
-    st.line_chart(crypto_data["Bitcoin"]["Close"])
-else:
-    st.warning("Impossible d'afficher les données Bitcoin.")
+with onglet1:
+    # Affichage des données Bitcoin
+    st.subheader("Bitcoin ($)")
+    btc_img_url = 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
+    st.image(Image.open(urlopen(btc_img_url)))
 
+    if crypto_data["Bitcoin"] is not None:
+        st.table(crypto_data["Bitcoin"])
+        st.line_chart(crypto_data["Bitcoin"]["Close"])
+    else:
+        st.warning("Impossible d'afficher les données Bitcoin.")
+
+with onglet2:
 # Affichage des données Ethereum
-st.subheader("Ethereum ($)")
-eth_img_url = 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
-st.image(Image.open(urlopen(eth_img_url)))
+    st.subheader("Ethereum ($)")
+    eth_img_url = 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+    st.image(Image.open(urlopen(eth_img_url)))
 
-if crypto_data["Ethereum"] is not None:
-    st.table(crypto_data["Ethereum"])
-    st.line_chart(crypto_data["Ethereum"]["Close"])
-else:
-    st.warning("Impossible d'afficher les données Ethereum.")
+    if crypto_data["Ethereum"] is not None:
+        st.table(crypto_data["Ethereum"])
+        st.line_chart(crypto_data["Ethereum"]["Close"])
+    else:
+        st.warning("Impossible d'afficher les données Ethereum.")
 
+with onglet3:
 # Affichage des données Solana
-st.subheader("Solana ($)")
-sol_img_url = 'https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png'
-st.image(Image.open(urlopen(sol_img_url)))
+    st.subheader("Solana ($)")
+    sol_img_url = 'https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png'
+    st.image(Image.open(urlopen(sol_img_url)))
 
-if crypto_data["Solana"] is not None:
-    st.table(crypto_data["Solana"])
-    st.line_chart(crypto_data["Solana"]["Close"])
-else:
-    st.warning("Impossible d'afficher les données Solana.")
+    if crypto_data["Solana"] is not None:
+        st.table(crypto_data["Solana"])
+        st.line_chart(crypto_data["Solana"]["Close"])
+    else:
+        st.warning("Impossible d'afficher les données Solana.")
