@@ -31,7 +31,11 @@ export_page = st.Page(
     icon="🏠",
 )
 
+# --- Navigation setup --- #
+
 pg = st.navigation(pages=[dashboard_page, market_page, wallet_page, export_page])
 pg.run()
 
-st.title("Outil d'Analyse de Portefeuille d'Investissement")
+# --- Shared on all pages --- #
+st.logo("assets/logo-removebg2.png")
+st.sidebar.text("Made by Mathis BORGES, Bristhis DEGBEKO, Jerome WEIBEL")
