@@ -6,28 +6,73 @@ import pandas as pd
 import requests
 from datetime import datetime, timedelta
 from views.login import show_login_page
+import plotly.graph_objects as go
+import numpy as np
+import ta
 
-# initialiser l'état de connexion
+# Initialiser l'état de connexion s'il n'existe pas
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 
+
 def show_dashboard():
-
-    #Bouton de connexion
-    with st.sidebar:
-        if not st.session_state.get('logged_in', False):
-            if st.button("Se connecter"):
-                show_login_page()
-                return
-        else:
-            if st.button("Se déconnecter"):
-                st.session_state.logged_in = False
-                st.rerun()
-
-    # vérifier si l'utilisateur est connecté
     if not st.session_state.get('logged_in', False):
         show_login_page()
         return
+
+    # Layout principal
+    st.title("Dashboard")
+    
+    # Première section : Vue d'ensemble du portefeuille
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric(
+            label="Valeur totale du portefeuille",
+            value="$25,000",
+            delta="+ $1,200 (4.8%)"
+        )
+    with col2:
+        st.metric(
+            label="Profit/Perte 24h",
+            value="+ $180",
+            delta="2.3%"
+        )
+    with col3:
+        st.metric(
+            label="Nombre d'actifs",
+            value="8",
+            delta="2 nouveaux"
+        )
+
+    # Deuxième section : Graphique principal
+    st.subheader("Évolution du portefeuille")
+    
+    # Création d'un graphique exemple avec Plotly (a installer)
+    @st.cache_data
+    def get_portfolio_history():
+        # Simulation de données historiques
+        dates = pd.date_range(start='2024-01-01', end=datetime.now(), freq='D')
+        data = pd.DataFrame({
+            'Date': dates,
+            'Value': [20000 + i * 100 + np.random.randn() * 500 for i in range(len(dates))]
+        })
+        return data
+
+    portfolio_data = get_portfolio_history()
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=portfolio_data['Date'],
+        y=portfolio_data['Value'],
+        fill='tozeroy',
+        name='Portfolio Value'
+    ))
+    fig.update_layout(
+        height=400,
+        margin=dict(l=0, r=0, t=30, b=0)
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Troisième section : Répartition des actifs (déplacé dans wallet)
 
     st.title("Outil d'Analyse de Portefeuille d'Investissement")
     st.header("Main Dashboard")
@@ -51,10 +96,10 @@ def show_dashboard():
             st.error(f"Erreur lors de la récupération des données pour {symbol}: {e}")
             return None
 
-    # récupération des historiques en cache permet de limiter les requetes.
+    # Récupération des historiques en cache permet de limiter les requetes.
     historical_data = {name: get_crypto_history(symbol) for name, symbol in cryptos.items()}
 
-    # téléchargement des données sur une période donnée
+    # Téléchargement des données sur une période donnée
     @st.cache_data
     def download_crypto_data(symbol, start, end):
         """Télécharge les données d'une crypto pour une période donnée."""
@@ -64,7 +109,7 @@ def show_dashboard():
             st.error(f"Erreur lors du téléchargement des données pour {symbol}: {e}")
             return None
 
-    #recuperer les tendances du marchés
+    #Recuperer les tendances du marchés
     @st.cache_data
     def get_top_trending_cryptos():
         url = "https://api.coingecko.com/api/v3/coins/markets"
@@ -81,10 +126,10 @@ def show_dashboard():
             data = response.json()
             df = pd.DataFrame(data)
             
-            # trier par la plus forte hausse en pourcentage sur 24h
+            # Trier par la plus forte hausse en pourcentage sur 24h
             df = df.sort_values(by="price_change_percentage_24h", ascending=False)
             
-            # sélectionner les 5 cryptos les plus performantes
+            # Sélectionner les 5 cryptos les plus performantes
             top_5 = df.head(5)[["name", "symbol", "image", "current_price", "price_change_percentage_24h"]]
             
             return top_5
@@ -155,3 +200,170 @@ def show_dashboard():
             st.line_chart(crypto_data["Solana"]["Close"])
         else:
             st.warning("Impossible d'afficher les données Solana.")
+
+    # Nouvelle section : Indicateurs Techniques
+    st.subheader("Indicateurs Techniques")
+    
+    # Sélection de l'actif pour l'analyse technique
+    asset_for_analysis = st.selectbox(
+        "Sélectionner un actif pour l'analyse technique",
+        ["Bitcoin", "Ethereum", "Solana", "Tesla"]
+    )
+
+    # Récupération des données pour l'analyse technique
+    @st.cache_data
+    def get_asset_data(asset):
+        if asset in ["Bitcoin", "Ethereum", "Solana"]:
+            symbol = {"Bitcoin": "BTC-USD", "Ethereum": "ETH-USD", "Solana": "SOL-USD"}[asset]
+        else:
+            symbol = "TSLA"
+        
+        try:
+            # Télécharger les données
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=365)
+            
+            # Récupérer les données brutes
+            df = yf.download(
+                symbol,
+                start=start_date,
+                end=end_date,
+                interval='1d'
+            )
+            
+            if df.empty:
+                st.error(f"Aucune donnée disponible pour {asset}")
+                return None
+
+            # Créer un nouveau DataFrame avec uniquement les prix de clôture
+            data = pd.DataFrame()
+            data['Close'] = df['Close']
+            
+            # Calcul des indicateurs techniques
+            # Moyennes mobiles
+            data['SMA_20'] = data['Close'].rolling(window=20).mean()
+            data['SMA_50'] = data['Close'].rolling(window=50).mean()
+            
+            # RSI
+            delta = data['Close'].diff()
+            gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+            loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+            rs = gain / loss
+            data['RSI'] = 100 - (100 / (1 + rs))
+            
+            # MACD
+            exp1 = data['Close'].ewm(span=12, adjust=False).mean()
+            exp2 = data['Close'].ewm(span=26, adjust=False).mean()
+            data['MACD'] = exp1 - exp2
+            
+            # Bandes de Bollinger
+            data['BB_middle'] = data['Close'].rolling(window=20).mean()
+            data['BB_high'] = data['BB_middle'] + 2 * data['Close'].rolling(window=20).std()
+            data['BB_low'] = data['BB_middle'] - 2 * data['Close'].rolling(window=20).std()
+            
+            return data
+            
+        except Exception as e:
+            st.error(f"Erreur lors du calcul des indicateurs pour {asset}: {str(e)}")
+            return None
+
+    # Récupération des données
+    technical_data = get_asset_data(asset_for_analysis)
+
+    # Création des onglets pour différents types d'analyses
+    tab1, tab2, tab3 = st.tabs(["Moyennes Mobiles & Bollinger", "RSI", "MACD"])
+
+    # Vérification des données avant d'afficher les graphiques
+    if technical_data is not None:
+        with tab1:
+            fig = go.Figure()
+            
+            # Prix de clôture
+            fig.add_trace(go.Scatter(
+                x=technical_data.index,
+                y=technical_data['Close'],
+                name='Prix',
+                line=dict(color='blue')
+            ))
+            
+            # SMA 20
+            fig.add_trace(go.Scatter(
+                x=technical_data.index,
+                y=technical_data['SMA_20'],
+                name='SMA 20',
+                line=dict(color='orange', dash='dash')
+            ))
+            
+            # SMA 50
+            fig.add_trace(go.Scatter(
+                x=technical_data.index,
+                y=technical_data['SMA_50'],
+                name='SMA 50',
+                line=dict(color='green', dash='dash')
+            ))
+            
+            # Bandes de Bollinger
+            fig.add_trace(go.Scatter(
+                x=technical_data.index,
+                y=technical_data['BB_high'],
+                name='BB Supérieure',
+                line=dict(color='gray', dash='dot')
+            ))
+            
+            fig.add_trace(go.Scatter(
+                x=technical_data.index,
+                y=technical_data['BB_low'],
+                name='BB Inférieure',
+                line=dict(color='gray', dash='dot'),
+                fill='tonexty'
+            ))
+
+            fig.update_layout(
+                title=f"Analyse Technique - {asset_for_analysis}",
+                height=500,
+                xaxis_title="Date",
+                yaxis_title="Prix"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+        with tab2:
+            if not technical_data['RSI'].isnull().all():
+                fig = go.Figure()
+                
+                fig.add_trace(go.Scatter(
+                    x=technical_data.index,
+                    y=technical_data['RSI'],
+                    name='RSI'
+                ))
+                
+                fig.add_hline(y=70, line_dash="dash", line_color="red", annotation_text="Surachat")
+                fig.add_hline(y=30, line_dash="dash", line_color="green", annotation_text="Survente")
+                
+                fig.update_layout(
+                    title="RSI",
+                    height=300,
+                    yaxis=dict(range=[0, 100])
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.warning("Données RSI non disponibles")
+
+        with tab3:
+            if not technical_data['MACD'].isnull().all():
+                fig = go.Figure()
+                
+                fig.add_trace(go.Bar(
+                    x=technical_data.index,
+                    y=technical_data['MACD'],
+                    name='MACD'
+                ))
+                
+                fig.update_layout(
+                    title="MACD",
+                    height=300
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.warning("Données MACD non disponibles")
+    else:
+        st.warning("Données non disponibles pour cet actif")
