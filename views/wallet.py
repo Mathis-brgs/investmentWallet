@@ -1,3 +1,4 @@
 import streamlit as st
 
-st.title("Check your investment")
+def show_wallet():
+    st.title("Wallet View")

@@ -5,37 +5,43 @@ from urllib.request import urlopen
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
+from views.dashboard import show_dashboard
+from views.login import show_login_page
 
-dashboard_page = st.Page(
-    page="views/dashboard.py",
-    title="Dashboard",
-    icon="🏠",
-    default=True,
+# Initialisation de l'état de session
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+# Configuration de la page
+st.set_page_config(
+    page_title="Investment Wallet",
+    page_icon="💰",
+    layout="wide"
 )
-
-market_page = st.Page(
-    page="views/market.py",
-    title="Market",
-    icon="🏠",
-)
-
-wallet_page = st.Page(
-    page="views/wallet.py",
-    title="Wallet",
-    icon="🏠",
-)
-
-export_page = st.Page(
-    page="views/export.py",
-    title="Export",
-    icon="🏠",
-)
-
-# --- Navigation setup --- #
-
-pg = st.navigation(pages=[dashboard_page, market_page, wallet_page, export_page])
-pg.run()
 
 # --- Shared on all pages --- #
-st.logo("assets/logo-removebg2.png")
+st.sidebar.image("assets/logo-removebg2.png")
+st.sidebar.text("AlphaTrack")
 st.sidebar.text("Made by Mathis BORGES, Bristhis DEGBEKO, Jerome WEIBEL")
+
+# Vérification de la connexion et affichage des pages
+if not st.session_state.get('logged_in', False):
+    show_login_page()
+else:
+    # Menu de navigation pour utilisateur connecté
+    menu = st.sidebar.selectbox(
+        "Navigation",
+        ["Dashboard", "Market", "Wallet", "Export"]
+    )
+    
+    if menu == "Dashboard":
+        show_dashboard()
+    elif menu == "Market":
+        from views.market import show_market
+        show_market()
+    elif menu == "Wallet":
+        from views.wallet import show_wallet
+        show_wallet()
+    elif menu == "Export":
+        from views.export import show_export
+        show_export()
