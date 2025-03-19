@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from views.dashboard import show_dashboard
 from views.login import show_login_page
 
+
 # Initialisation de l'état de session
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
@@ -31,7 +32,7 @@ else:
     # Menu de navigation pour utilisateur connecté
     menu = st.sidebar.selectbox(
         "Navigation",
-        ["Dashboard", "Market", "Wallet", "Export"]
+        ["Dashboard", "Market", "Wallet", "Export", "Tableau donnée"]
     )
     
     if menu == "Dashboard":
@@ -45,3 +46,6 @@ else:
     elif menu == "Export":
         from views.export import show_export
         show_export()
+    elif menu == "Formulaire data":
+        from views.dataEntry import show_data
+        show_data()
