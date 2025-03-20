@@ -35,13 +35,13 @@ def show_data():
             st.subheader("Actions")
             date = st.date_input("Date", label_visibility="visible")
             action_name = st.text_input("Action Name", label_visibility="visible")
-            price = st.number_input("Price", min_value=0, format="%i", step=10, label_visibility="visible")
+            unity_price = st.number_input("Unity Price", min_value=0, format="%i", step=10, label_visibility="visible")
             quantity = st.number_input("Quantity", min_value=0, format="%i", step=10, label_visibility="visible")
             comment = st.text_area("Comment", placeholder="Enter a comment here ...", label_visibility="visible")
             return {
                 "date": date,
                 "action_name": action_name,
-                "price": price,
+                "unity_price": unity_price,
                 "quantity": quantity,
                 "comment": comment
             }
@@ -49,13 +49,13 @@ def show_data():
             st.subheader("Crypto")
             date = st.date_input("Date", label_visibility="visible")
             crypto_name = st.text_input("Crypto Name", label_visibility="visible")
-            price = st.number_input("Price", min_value=0, format="%i", step=10, label_visibility="visible")
+            unity_price = st.number_input("Unity Price", min_value=0, format="%i", step=10, label_visibility="visible")
             quantity = st.number_input("Quantity", min_value=0, format="%i", step=10, label_visibility="visible")
             comment = st.text_area("Comment", placeholder="Enter a comment here ...", label_visibility="visible")
             return {
                 "date": date,
                 "crypto_name": crypto_name,
-                "price": price,
+                "unity_price": unity_price,
                 "quantity": quantity,
                 "comment": comment
             }
@@ -82,18 +82,18 @@ def show_data():
             return {
                 "date": data["date"],
                 "action_name": data["action_name"],
-                "price": data["price"],
+                "unity_price": data["unity_price"],
                 "quantity": data["quantity"],
-                "total_invested": data["price"] * data["quantity"],
+                "price": data["unity_price"] * data["quantity"],
                 "comment": data["comment"]
             }
         elif investment_type == "Crypto":
             return {
                 "date": data["date"],
                 "crypto_name": data["crypto_name"],
-                "price": data["price"],
+                "unity_price": data["unity_price"],
                 "quantity": data["quantity"],
-                "total_invested": data["price"] * data["quantity"],
+                "price": data["unity_price"] * data["quantity"],
                 "comment": data["comment"]
             }
         elif investment_type == "Immobilier":
@@ -146,9 +146,9 @@ def show_data():
                 for inv in filtered_investments:
                     st.write(f"**Date:** {inv['data']['date']}")
                     st.write(f"**Action Name:** {inv['data']['action_name']}")
-                    st.write(f"**Price:** {inv['data']['price']}")
+                    st.write(f"**Unity Price:** {inv['data']['price']}")
                     st.write(f"**Quantity:** {inv['data']['quantity']}")
-                    st.write(f"**Total Invested:** {inv['data']['total_invested']}")
+                    st.write(f"**Total Invested:** {inv['data']['price']}")
                     st.write(f"**Comment:** {inv['data']['comment']}")
                     st.write("---")
             else:
@@ -159,9 +159,9 @@ def show_data():
                 for inv in filtered_investments:
                     st.write(f"**Date:** {inv['data']['date']}")
                     st.write(f"**Crypto Name:** {inv['data']['crypto_name']}")
-                    st.write(f"**Price:** {inv['data']['price']}")
+                    st.write(f"**Unity Price:** {inv['data']['price']}")
                     st.write(f"**Quantity:** {inv['data']['quantity']}")
-                    st.write(f"**Total Invested:** {inv['data']['total_invested']}")
+                    st.write(f"**Total Invested:** {inv['data']['price']}")
                     st.write(f"**Comment:** {inv['data']['comment']}")
                     st.write("---")
             else:

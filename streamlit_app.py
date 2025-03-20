@@ -32,7 +32,7 @@ else:
     # Menu de navigation pour utilisateur connecté
     menu = st.sidebar.selectbox(
         "Navigation",
-        ["Dashboard", "Market", "Wallet", "Export", "Tableau donnée"]
+        ["Dashboard", "Market", "Wallet", "Export", "Formulaire data"]
     )
     
     if menu == "Dashboard":
